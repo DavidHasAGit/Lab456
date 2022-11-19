@@ -1,6 +1,8 @@
-package filter;
+package option;
 
 import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Filters {
     static String[] filtersNames = new String[]{"place name", "ticket type", "transport", "meals", "city of departure", "duration", "cost"};
@@ -100,13 +102,46 @@ public class Filters {
         }
         return filterExist;
     }
-
+    public boolean withFilter(String ticketInfo) {
+        if (exist[0][0]) {
+            if (!ticketInfo.contains(ticketType[0][0])) return false;
+        }
+        if (exist[exist.length - 1][0] || exist[exist.length - 1][1]) {
+            int cost = getIntFromString(ticketInfo);
+            if (cost < Integer.parseInt(ticketType[ticketType.length - 1][0])
+                    || cost > Integer.parseInt(ticketType[ticketType.length - 1][1]))
+                return false;
+        }
+        for (int i = 1; i < exist.length - 1; i++) {
+            boolean typeIs = false, filterIs = false;
+            for (int j = 0; j < exist[i].length; j++) {
+                if (exist[i][j]) {
+                    filterIs = true;
+                    if (ticketInfo.contains(ticketType[i][j])) typeIs = true;
+                }
+            }
+            if(!typeIs && filterIs) return false;
+        }
+        return true;
+    }
+    protected int getIntFromString(String string) {
+        Pattern integerPattern = Pattern.compile("-?\\d+");
+        Matcher matcher = integerPattern.matcher(string);
+        int num = 0;
+        if (matcher.find()) {
+            num = Integer.parseInt(matcher.group());
+        }
+        return num;
+    }
     public void resetFilters() {
         exist = existDefault;
         filtersExist = false;
     }
     public static boolean[][] getExist() {
         return exist;
+    }
+    public static boolean getAnyFilterExist() {
+        return filtersExist;
     }
     public static String[][] getTicketType() {
         return ticketType;
